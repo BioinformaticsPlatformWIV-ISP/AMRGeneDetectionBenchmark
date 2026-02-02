@@ -1,0 +1,35 @@
+strainmadness1:
+  clean_name: StrainMadness1
+  chemistry: R9
+
+strainmadness2:
+  clean_name: StrainMadness2
+  chemistry: R9
+
+strainmadness3:
+  clean_name: StrainMadness3
+  chemistry: R9
+
+zymo:
+  clean_name: Zymo_D6300
+  chemistry: R10
+
+zymo_gut_r9:
+  clean_name: Zymo_D6331_R9
+  chemistry: R9
+
+zymo_gut_r10:
+  clean_name: Zymo_D6331_R10
+  chemistry: R10
+
+hm276d:
+  clean_name: HM-276D
+  chemistry: R9
+
+hm277d:
+  clean_name: HM-277D
+  chemistry: R9
+
+zymo_oral:
+  clean_name: Zymo_D6332
+  chemistry: R10

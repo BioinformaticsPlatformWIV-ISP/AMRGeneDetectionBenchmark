@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "amr_gene_detection"
+version = "0.1.0"
+description = "AMR gene detection in Oxford Nanopore long reads"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "GPL-3.0-or-later"
+
+authors = [
+  {name = "Maxime Godfroid", email = "bioit@sciensano.be"}
+]
+
+keywords = ["amr", "ont", "benchmark"]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+    "biopython>=1.78",
+    "ConfigArgParse>=1.2.3",
+    "hAMRonization>=1.1.4",
+    "humanize>=3.11.0",
+    "Jinja2>=3.1.2",
+    "jsonschema>=3.2.0",
+    "numpy>=1.24.4",
+    "pandas>=2.2.1",
+    "plotnine<=0.14.5",
+    "PuLP<=2.7.0",
+    "pytest>=6.1.1",
+    "PyYAML>=6.0",
+    "requests>=2.26.0",
+    "scikit-learn>=1.5.0",
+    "snakemake>=7.32.4"
+]
+
+[project.urls]
+Homepage = "https://github.com/BioinformaticsPlatformWIV-ISP/AMRGeneDetectionBenchmark"
+Issues = "https://github.com/BioinformaticsPlatformWIV-ISP/AMRGeneDetectionBenchmark/issues"
+
+[tool.setuptools.packages.find]
+include = ["detection*"]
+
+[tool.setuptools.package-data]
+"detection" = [
+  "config/config.yml.sample",
+  "config/*.yml",
+  "templates/*.jinja",
+  "resources/*.csv",
+  "resources/*.smk"
+]
+
+[project.scripts]
+amr_detection='detection.scripts.run_main_detection:main'
+reporter_sample='detection.scripts.run_reporter:main'
+reporter_aggregated='detection.scripts.run_aggregated_reporter:main'

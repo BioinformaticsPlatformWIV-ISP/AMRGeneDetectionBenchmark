@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title>{{ title }}</title>
+        <style>
+        .responsive-img {
+            max-width: 100%;
+            height: auto;
+            display: block;<
+        }
+        </style>
+    </head>
+    <body>
+        <div id="presence_absence">
+            <h2>Presence Absence graph</h2>
+            <p> This graph shows the AMR-conferring genes identified in the ground truth data reference genomes. </p>
+            <img src="{{ graph_PA }}" alt="Adaptive Image" class="responsive-img" width="1000">
+        </div>
+
+        <div id="summary_statistics">
+            <h2>Statistics graph</h2>
+            <p>
+                In this graph are plotted summary statistics of the AMR gene discovery in samples. <br>
+                Precision is the positive predictive value, calculated as TP / (TP+FP) <br>
+                Recall is the true positive rate (or sensitivity), calculated as TP / (TP+FN) <br>
+                F1 is the predictive performance and calculated as 2 / ((recall**-1) + (precision**-1)) <br>
+            </p>
+            <img src="{{ graph_stats }}" alt="Adaptive Image" class="responsive-img" width="1000">
+        </div>
+
+        <div id="depth_graph">
+            <h2>Depth graph</h2>
+            <p>
+                Each of the subplots hereafter represents the TP/FN and FP AMR genes detected in the sequencing samples. <br>
+                As a reminder, the TP/FN plots show only the genes present in the ground truth. <br/>
+                The number inside the tile shows the reads depth (for KMA) or the number of reads supporting the discovery. <br>
+            </p>
+            {% for image in graph_dictionary %}
+                <img src="{{ image.src }}" alt="Adaptive Image" class="responsive-img" width="1000">
+            {% endfor %}
+        </div>
+
+        <div id="precision_recall">
+            <h2>Precision-Recall plots</h2>
+            <p>
+                For each of the tool, and for each coverage threshold (corresponding to each line), <br>
+                the identity threshold is moved from 50% to 100%, <br>
+                and the corresponding precision and recall values are reported in each of the subplots. <br>
+                In the dot plot, the coverage and identity thresholds are the axis, and the <br>
+                precision and recall values are plotted as the size and color respectively. <br>
+            </p>
+            {% for image in graph_precision_recall %}
+                <img src="{{ image.src }}" alt="Adaptive Image" class="responsive-img" width="1000">
+            {% endfor %}
+            {% for image in graph_precision_recall %}
+                <img src="{{ image.src_reverse }}" alt="Adaptive Image" class="responsive-img" width="1000">
+            {% endfor %}
+        </div>
+    </body>
+</html>

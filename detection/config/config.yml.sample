@@ -1,0 +1,34 @@
+# Logging and storage
+dir_temp: /scratch/temp/
+logging:
+  format: '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'
+  store_logs: true
+  dir_logs: /path/to/logs/
+
+# Resources
+resources:
+  nb_jobs: 1
+  threads_per_job: 4
+
+# Read filtering
+read_filtering:
+  length: 1000
+  quality: 7
+
+# Alignment filtering
+alignment_filtering:
+  length: 80
+  identity: 90
+
+# Databases
+database_directory: /path/to/databases/
+
+# Conda root
+conda_root: path_to_conda_root
+
+# Conda environment names:
+conda_env_names:
+    argo: name_of_argo_conda_env
+    argpore: name_of_argpore_conda_env
+    deeparg: name_of_deeparg_conda_env
+    shortbred: name_of_shortbred_conda_env

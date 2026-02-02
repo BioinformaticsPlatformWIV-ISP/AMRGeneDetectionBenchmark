@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title>{{ title }}</title>
+        <style>
+        .responsive-img {
+            max-width: 100%;
+            height: auto;
+            display: block;<
+        }
+        </style>
+    </head>
+    <body>
+        <div id="aggregated_metrics">
+            <h2>Aggregated metrics</h2>
+            <p>
+                This graph shows the boxplot of metrics for each dataset. <br>
+                For each of the tool (one subplot each), we recorded the value of each metric and reported it in the boxplot below.<br>
+                Each dataset is colored accordingly. When applicable, the distinction is made between detection at the allele level and at the gene level <br>
+            </p>
+            <img src="{{ graph_boxplot }}" alt="Adaptive Image" class="responsive-img" width="1000">
+        </div>
+        <div id="aggregated_mean_values">
+            <h2>Aggregated mean values</h2>
+            <p>
+                In this graph are plotted the aggregated mean values of each tool at an identity threshold of 90%. <br>
+                The metrics are calculated for a moving coverage threshold from 50% to 100%. <br>
+                Precision is the positive predictive value, calculated as TP / (TP+FP) <br>
+                Recall is the true positive rate (or sensitivity), calculated as TP / (TP+FN) <br>
+                F1 is the predictive performance and calculated as 2 / ((recall**-1) + (precision**-1)) <br>
+            </p>
+            <img src="{{ graph_mean_values }}" alt="Adaptive Image" class="responsive-img" width="1000">
+        </div>
+
+        <div id="auprc">
+            <h2>AUPRC graphs</h2>
+            <p>
+                In these graphs are plotted the Area Under the Precision-Recall curves for all tools and for each dataset separately. <br>
+                These AUPRC are displayed in function of a fixed threshold (X axis). <br>
+                For each of the fixed thresholds, the AUPRC (Y axis) is calculated on the PR curve with moving the second threshold parameter. <br>
+            </p>
+            {% for image in graph_auprc %}
+            <img src="{{ image.src }}" alt="Adaptive Image" class="responsive-img" width="1000">
+        {% endfor %}
+        </div>
+    </body>
+</html>

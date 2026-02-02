@@ -1,0 +1,36 @@
+argo:
+  clean_name: Argo
+  params:
+    conda:
+      - {argo_conda_env}
+    db: {db_directory}/ARGO
+    db_version: 2024-12-18.1
+
+argpore2:
+  clean_name: ARGpore2
+  params:
+    conda:
+      - {argpore_conda_env}
+    db_version: 2024-12-18.1
+
+deeparg:
+  clean_name: DeepARG
+  params:
+    model_path: {db_directory}/DEEPARG/
+    conda:
+      - {deeparg_conda_env}
+    db_version: 2024-12-18.1
+
+shortbred:
+  clean_name: ShortBRED
+  params:
+    markers_path: {db_directory}/SHORTBRED/ndaro_prot_markers.faa
+    conda:
+      - {shortbred_conda_env}
+    db_version: 2024-12-18.1
+
+kma:
+  clean_name: KMA
+  params:
+    db: {db_directory}/KMA/ncbi_amr.fasta
+    db_version: 2024-12-18.1
