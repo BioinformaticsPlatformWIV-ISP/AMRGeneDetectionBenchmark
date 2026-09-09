@@ -11,6 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 from sklearn.metrics import auc
 
 from detection.app.utils.loggingutils import initialize_logging
+from detection.config import load_dataset_config
 from detection.scripts import relative_to_absolute_path
 
 REPORT_AGG_TEMPLATE = Path(__file__).parent.parent / 'templates'
@@ -174,14 +175,18 @@ def _retrieve_precision_recall_files(arguments: argparse.Namespace,
             tool = table.stem.split('_')[0]
             if tool in arguments.list_of_tools:
                 dataset = table.parent.parent.stem
+                try:
+                    dataset = mock_name_correspondence[dataset]
+                except KeyError:
+                    pass
                 for threshold in range_thresholds:
                     auc_coverage = _calculate_auc_from_subtable(input_table, 'Coverage_threshold', threshold)
                     auc_identity = _calculate_auc_from_subtable(input_table, 'Identity_threshold', threshold)
 
                     output_file.write(f'{tool}\t{auc_coverage}\tcoverage\t{threshold}\t{level}\t{dataset}\n')
                     output_file.write(f'{tool}\t{auc_identity}\tidentity\t{threshold}\t{level}\t{dataset}\n')
-                    output_auprc_table.append([tool, auc_coverage, 'coverage', threshold, level, dataset])
-                    output_auprc_table.append([tool, auc_identity, 'identity', threshold, level, dataset])
+                    output_auprc_table.append([tool, auc_coverage, 'Coverage', threshold, level, dataset])
+                    output_auprc_table.append([tool, auc_identity, 'Identity', threshold, level, dataset])
 
     auprc_dataframe = pd.DataFrame(output_auprc_table)
     if auprc_dataframe.empty:
@@ -402,10 +407,12 @@ def main() -> None:
     if not args.dir_out.exists():
         args.dir_out.mkdir(parents=True)
 
-    statistics_table = _retrieve_statistics_information(args)
+    dataset_config = load_dataset_config()
+
+    statistics_table = _retrieve_statistics_information(args, dataset_config)
     boxplot_plot_dictionary = _plot_aggregated_metrics_boxplot(statistics_table, args)
 
-    precision_recall_table = _retrieve_precision_recall_files(args)
+    precision_recall_table = _retrieve_precision_recall_files(args, dataset_config)
     auprc_plot_dictionary = _plot_auprc_values(precision_recall_table, args)
 
     mean_metrics_table = _compute_mean_value_across_datasets(args)

@@ -11,13 +11,13 @@ def calculate_metrics(ground_truth_genes: set, amr_genes: set) -> tuple[float, f
     try:
         precision = len(true_positives) / (len(true_positives) + len(false_positives))
     except ZeroDivisionError:
-        precision = 0.0
+        precision = None
     try:
         recall = len(true_positives) / (len(true_positives) + len(false_negatives))
     except ZeroDivisionError:
-        recall = 0.0
+        recall = None
     try:
         f1_score = 2 / (precision ** -1 + recall ** -1)
-    except ZeroDivisionError:
-        f1_score = 0.0
+    except (ZeroDivisionError, TypeError):
+        f1_score = None
     return precision, recall, f1_score

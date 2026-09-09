@@ -6,6 +6,8 @@ This framework can be used to benchmark gene performance directly from long-read
 
 Version: **1.0**
 
+Test files, as well as the databases, ground truths and genes covered are available in [Zenodo](10.5281/zenodo.18458145). 
+
 ## Installation
 
 ### Installing the framework
@@ -39,16 +41,16 @@ Multiple tools and executables need to be available in your PATH, for which prec
 
 - [usearch v11.0.667](https://github.com/rcedgar/usearch_old_binaries/) 
 - [seqkit v2.8.2](https://github.com/shenwei356/seqkit/releases/tag/v2.8.2) 
-- [KMA](https://github.com/genomicepidemiology/kma), which could also be available as a conda environment
+- [KMA v.14.12a](https://github.com/genomicepidemiology/kma), which could also be available as a conda environment
 
 Additionally, the tools implemented in this framework require:
 1. the internal NDARO database used for the benchmarking (available on the Zenodo archive);
 2. to be available via separate conda environments. Due to dependencies incompatibilities, the tools cannot be bundled in a single environment.
 
-- [Argo](https://github.com/xinehc/argo?tab=readme-ov-file#installation)
-- [ARGpore2](https://github.com/sustc-xylab/ARGpore2?tab=readme-ov-file#pre-requisites-for-argpore) (see also additional notes)
-- [DeepARG](https://github.com/gaarangoa/deeparg?tab=readme-ov-file#use-conda-environment)
-- [ShortBRED](https://github.com/biobakery/biobakery/wiki/shortbred#1-install)
+- [Argo v0.2.0](https://github.com/xinehc/argo?tab=readme-ov-file#installation)
+- [ARGpore2 v2.1](https://github.com/sustc-xylab/ARGpore2?tab=readme-ov-file#pre-requisites-for-argpore) (see also additional notes)
+- [DeepARG v1.0.2](https://github.com/gaarangoa/deeparg?tab=readme-ov-file#use-conda-environment)
+- [ShortBRED v0.9.5](https://github.com/biobakery/biobakery/wiki/shortbred#1-install)
 
 ### Additional note for ARGpore2
 
