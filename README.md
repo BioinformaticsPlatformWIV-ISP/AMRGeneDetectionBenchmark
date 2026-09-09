@@ -4,7 +4,7 @@ This framework can be used to benchmark gene performance directly from long-read
 1. Perform gene detection on long-read data using various tools;
 2. Generate HTML reports summarizing the main findings, for either a single sample (sample reporter) or across all samples (aggregated reporter).
 
-Version: **1.0**
+Version: **1.1**
 
 Test files, as well as the databases, ground truths and genes covered are available in [Zenodo](10.5281/zenodo.18458145). 
 
