@@ -16,6 +16,7 @@ class GeneDetectionReporter(BaseReporter):
     """
 
     RANGE_THRESHOLDS = list(range(50, 105, 5))
+    COLORS_BARPLOT = ["#3588d1", "#8c0250", "#5cbca1", "#424175", "#bbc3fe"]
 
     def detected_genes_to_readable_table(self, tool_id: str, ground_truth: pd.DataFrame,
                                          detected_amr: pd.DataFrame) -> None:
@@ -87,7 +88,11 @@ class GeneDetectionReporter(BaseReporter):
         p += plotnine.theme(
             axis_text_x=plotnine.element_text(angle=45, hjust=1),
             axis_text_y=plotnine.element_text(style='italic'))
-        p += plotnine.labs(title='Presence-Absence plot.')
+        p += plotnine.labs(
+            title='Presence-Absence plot.',
+            subtitle='AMR genes that are present in the ground truth.'
+        )
+
         p.draw(show=True)
         p.save(output_figure_path, verbose=False, dpi=300, bbox_inches='tight', pad_inches=0)
         self.output_dictionary['graph_PA'] = output_figure_path
@@ -119,7 +124,7 @@ class GeneDetectionReporter(BaseReporter):
         p += plotnine.geom_col(position=plotnine.position_dodge(preserve='single'), color='black')
         p += plotnine.ylim(0, 1)
         p += plotnine.labs(x='Statistic', y='Value', fill='Tool')
-        p += plotnine.scale_fill_brewer(type="qual", palette="Set2")
+        p += plotnine.scale_fill_manual(values=GeneDetectionReporter.COLORS_BARPLOT)
         p.draw(show=True)
         p.save(output_figure_path, verbose=False, dpi=300)
         self.output_dictionary['graph_stats'] = output_figure_path
@@ -152,15 +157,15 @@ class GeneDetectionReporter(BaseReporter):
             depth_table['type'] = table_type
         else:
             depth_table = data_table
-        depth_table['y_position'] = 1
-        depth_table['x_position'] = 1
-        count_position = 1
         number_of_columns = 20
+        y_positions = []
+        x_positions = []
         for i in range(0, len(depth_table.index), number_of_columns):
-            depth_table['y_position'][i:i + number_of_columns] = count_position
-            depth_table['x_position'][i:i + number_of_columns] = (
-                list(range(1, number_of_columns + 1)))[:len(depth_table[i:i + number_of_columns].index)]
-            count_position += 1
+            max_positions = len(depth_table[i:i + number_of_columns].index)
+            y_positions.extend(np.repeat(i//number_of_columns + 1, number_of_columns).tolist()[:max_positions])
+            x_positions.extend(list(range(1, number_of_columns + 1))[:max_positions])
+        depth_table['y_position'] = y_positions
+        depth_table['x_position'] = x_positions
         if tool_used == 'ShortBRED':
             try:
                 depth_table['depth'] = depth_table['depth'].apply(lambda x: f'{x:.2f}')
@@ -193,6 +198,87 @@ class GeneDetectionReporter(BaseReporter):
 
         return genes_from_ground_truth, genes_only_fp, counts_tp_fn
 
+    def plot_tp_fn_only(
+            self,
+            tp_table: pd.DataFrame,
+            output_png: Path,
+            tool: str,
+            counts: dict,
+            tile_width: float = 0.95,
+            tile_height: float = 0.95) -> None:
+        """
+        Generates the plot of the TP for a specific tool.
+        :param tp_table: pandas dataframe with true positives.
+        :param output_png: path to output png file.
+        :param tool: tool used to generate data
+        :param counts: number of TP and FN
+        :param tile_width: tile width
+        :param tile_height: tile height
+        :return: None
+        """
+        p = plotnine.ggplot(tp_table,
+                            plotnine.aes(x='x_position', y='y_position', fill='factor(presence)'))
+        p += plotnine.geom_tile(plotnine.aes(width=tile_width, height=tile_height), color='black')
+        p += self.text_in_tile(tp_table)
+        p += plotnine.coord_equal(expand=False)
+        p += plotnine.theme(axis_text_x=plotnine.element_blank(),
+                            axis_title_x=plotnine.element_blank(),
+                            axis_text_y=plotnine.element_blank(),
+                            axis_title_y=plotnine.element_blank(),
+                            axis_ticks_y=plotnine.element_blank(),
+                            axis_ticks_x=plotnine.element_blank())
+        p += plotnine.scale_fill_manual(values={'TP': '#0cc0aa', 'FN': '#8d102b'})
+        p += plotnine.labs(fill='presence in sample', title=f'{tool} - TP/FN AMR gene coverage',
+                           caption=f'no. TP = {counts.get("TP", 0)}, no. FN = {counts.get("FN", 0)}')
+        p += plotnine.theme(plot_caption=plotnine.element_text(margin={"t": 6, "units": "lines"}),
+                            figure_size=(8, 2))
+        p.draw(show=True)
+        p.save(output_png, verbose=False, dpi=300)
+
+    def plot_fp_only(
+            self,
+            fp_table: pd.DataFrame,
+            output_png: Path,
+            tool: str,
+            tile_width: float = 0.95,
+            tile_height: float = 0.95) -> None:
+        """
+        Generates the plot of the FP for a specific tool.
+        :param fp_table: pandas dataframe with true positives.
+        :param output_png: path to output png file.
+        :param tool: tool used to generate data
+        :param tile_width: tile width
+        :param tile_height: tile height
+        :return: None
+        """
+        number_of_fps = len(fp_table.index)
+        try:
+            p = plotnine.ggplot(fp_table, plotnine.aes(x='x_position', y='y_position', fill='type'))
+            p += plotnine.geom_tile(plotnine.aes(width=tile_width, height=tile_height), color='black')
+            p += self.text_in_tile(fp_table)
+            p += plotnine.coord_equal(expand=False)
+            p += plotnine.theme(axis_text_x=plotnine.element_blank(),
+                                axis_title_x=plotnine.element_blank(),
+                                axis_text_y=plotnine.element_blank(),
+                                axis_title_y=plotnine.element_blank(),
+                                axis_ticks_y=plotnine.element_blank(),
+                                axis_ticks_x=plotnine.element_blank(),
+                                legend_position='none')
+            p += plotnine.scale_fill_manual(values={'FP': '#cad3fa'})
+            p += plotnine.labs(fill='type', title=f'{tool} - FP AMR gene coverage',
+                               caption=f'#FP = {number_of_fps}')
+            p += plotnine.theme(plot_caption=plotnine.element_text(margin={"t": 6, "units": "lines"}),
+                                figure_size=(8, 2 * max(fp_table['y_position'])))
+            p.draw(show=True)
+            p.save(output_png, verbose=False, limitsize=False, dpi=300)
+
+        except (ZeroDivisionError, ValueError):
+            logging.warning(f'{tool} - no false positives detected.')
+            p = plotnine.ggplot(fp_table, plotnine.aes(x='gene', y='1', fill='type'))
+            p += plotnine.annotate("text", x=1, y=1, label="no FP")
+            p.draw(show=True)
+            p.save(output_png, verbose=False, dpi=300)
+
     def plot_statistics_per_gene(self, tile_width: float = 0.95, tile_height: float = 0.95) -> None:
         """
         Plots the TP/FN for retrieved genes based on depth.
@@ -211,54 +297,11 @@ class GeneDetectionReporter(BaseReporter):
             stats_filtered = {key: stats[tool][key] for key in stats_to_keep}
             genes_tp, genes_fp, counts_tp_fn = self.create_dataframe_for_plotting(stats_filtered, tool)
 
-            # Starting the plot - TP/FN
-            p = plotnine.ggplot(genes_tp,
-                                plotnine.aes(x='x_position', y='y_position', fill='factor(presence)'))
-            p += plotnine.geom_tile(plotnine.aes(width=tile_width, height=tile_height), color='black')
-            p += self.text_in_tile(genes_tp)
-            p += plotnine.coord_equal(expand=False)
-            p += plotnine.theme(axis_text_x=plotnine.element_blank(),
-                                axis_title_x=plotnine.element_blank(),
-                                axis_text_y=plotnine.element_blank(),
-                                axis_title_y=plotnine.element_blank(),
-                                axis_ticks_y=plotnine.element_blank(),
-                                axis_ticks_x=plotnine.element_blank())
-            p += plotnine.scale_fill_manual(values={'TP': '#228B22', 'FN': '#FF0000'})
-            p += plotnine.labs(fill='presence in sample', title=f'{tool} - TP/FN AMR gene coverage',
-                               caption=f'#TP = {counts_tp_fn.get("TP", 0)}, #FN = {counts_tp_fn.get("FN", 0)}')
-            p += plotnine.theme(plot_caption=plotnine.element_text(margin={"t": 6, "units": "lines"}),
-                                figure_size=(8, 2))
-            p.draw(show=True)
-            p.save(output_plot_tp_fn, verbose=False, dpi=300)
+            # Plotting TP and FN
+            self.plot_tp_fn_only(genes_tp, output_plot_tp_fn, tool, counts_tp_fn, tile_width, tile_height)
 
             # Starting the plot - FP
-            number_of_fps = len(genes_fp.index)
-            try:
-                p = plotnine.ggplot(genes_fp, plotnine.aes(x='x_position', y='y_position', fill='type'))
-                p += plotnine.geom_tile(plotnine.aes(width=tile_width, height=tile_height), color='black')
-                p += self.text_in_tile(genes_fp)
-                p += plotnine.coord_equal(expand=False)
-                p += plotnine.theme(axis_text_x=plotnine.element_blank(),
-                                    axis_title_x=plotnine.element_blank(),
-                                    axis_text_y=plotnine.element_blank(),
-                                    axis_title_y=plotnine.element_blank(),
-                                    axis_ticks_y=plotnine.element_blank(),
-                                    axis_ticks_x=plotnine.element_blank(),
-                                    legend_position='none')
-                p += plotnine.scale_fill_manual(values={'FP': '#ADD8E6'})
-                p += plotnine.labs(fill='type', title=f'{tool} - FP AMR gene coverage',
-                                   caption=f'#FP = {number_of_fps}')
-                p += plotnine.theme(plot_caption=plotnine.element_text(margin={"t": 6, "units": "lines"}),
-                                    figure_size=(8, 2 * max(genes_fp['y_position'])))
-                p.draw(show=True)
-                p.save(output_plot_fp, verbose=False, limitsize=False, dpi=300)
-
-            except (ZeroDivisionError, ValueError):
-                logging.warning(f'{tool} - no false positives detected.')
-                p = plotnine.ggplot(genes_fp, plotnine.aes(x='gene', y='1', fill='type'))
-                p += plotnine.annotate("text", x=1, y=1, label="no FP")
-                p.draw(show=True)
-                p.save(output_plot_fp, verbose=False, dpi=300)
+            self.plot_fp_only(genes_fp, output_plot_fp, tool, tile_width, tile_height)
 
             self.output_dictionary['graph_depth'].append({'src': output_plot_tp_fn})
             self.output_dictionary['graph_depth'].append({'src': output_plot_fp})
@@ -283,8 +326,8 @@ class GeneDetectionReporter(BaseReporter):
                     precision, recall, f1_score = calculate_metrics(gt_genes, genes_found)
                     dict_to_convert['Precision'].append(precision)
                     dict_to_convert['Recall'].append(recall)
-                    dict_to_convert['Identity_threshold'].append(f'{ident_thresh}')
-                    dict_to_convert['Coverage_threshold'].append(f'{cov_thresh}')
+                    dict_to_convert['Identity_threshold'].append(ident_thresh)
+                    dict_to_convert['Coverage_threshold'].append(cov_thresh)
                     dict_to_convert['level'].append(self.level)
             tool_result_dataframe = pd.DataFrame.from_dict(dict_to_convert)
             tool_result_dataframe.apply(pd.to_numeric, errors='coerce')
@@ -355,8 +398,6 @@ class GeneDetectionReporter(BaseReporter):
 
             pr_filename = output_directory / 'precision_recall.png'
             reversed_pr_filename = output_directory / 'precision_recall_reversed.png'
-
-            pr_dataframe.sort_values('Precision', ascending=False, inplace=True)
             pr_dataframe.sort_values('Coverage_threshold', ascending=True, inplace=True)
 
             # Plots the standard precision-recall curve

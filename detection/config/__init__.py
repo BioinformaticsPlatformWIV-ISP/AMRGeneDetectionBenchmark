@@ -37,4 +37,16 @@ def load_tools_config() -> dict:
     return data_db
 
 
+def load_dataset_config() -> dict:
+    """
+    Loads the dataset configuration.
+    :return: Dataset config dictionary
+    """
+    _path_config = Path(str(files('detection').joinpath('config/datasets.yml')))
+    if not _path_config.exists():
+        raise FileNotFoundError(f"No dataset config file found: {_path_config}")
+    with open(_path_config) as handle:
+        data_db = yaml.load(handle, Loader=yaml.SafeLoader)
+    return data_db
+
 config = _load_config()
